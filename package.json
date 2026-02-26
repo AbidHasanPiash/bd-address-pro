@@ -1,9 +1,20 @@
 {
+  "name": "bd-address-pro",
   "version": "1.0.0",
-  "description": "Bangladesh address dataset",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "description": "Bangladesh address dataset with divisions, districts, and upazilas - includes Bengali names, search, and utilities",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./data/*": "./dist/data/*"
+  },
   "files": [
     "dist"
   ],
@@ -12,11 +23,17 @@
     "address",
     "division",
     "district",
-    "upazila"
+    "upazila",
+    "bengali",
+    "bangla",
+    "location",
+    "geo",
+    "search"
   ],
   "license": "MIT",
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && bun run copy-data",
+    "copy-data": "bun scripts/copy-data.ts",
     "dev": "bun run src/index.ts"
   },
   "devDependencies": {

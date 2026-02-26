@@ -6,13 +6,6 @@
  */
 
 // ============================================================
-// Data Imports
-// ============================================================
-import divisions from './data/divisions.json';
-import districts from './data/districts.json';
-import upazilas from './data/upazilas.json';
-
-// ============================================================
 // Type Imports & Exports
 // ============================================================
 import type {
@@ -66,10 +59,33 @@ export {
 
 export type { SearchOptions } from './utils/search';
 
-// Type assertions
-const divisionsData = divisions as Division[];
-const districtsData = districts as District[];
-const upazilasData = upazilas as Upazila[];
+// ============================================================
+// Lazy-loaded Data (for bundle optimization)
+// ============================================================
+let _divisions: Division[] | null = null;
+let _districts: District[] | null = null;
+let _upazilas: Upazila[] | null = null;
+
+function getDivisionsData(): Division[] {
+  if (!_divisions) {
+    _divisions = require('./data/divisions.json') as Division[];
+  }
+  return _divisions;
+}
+
+function getDistrictsData(): District[] {
+  if (!_districts) {
+    _districts = require('./data/districts.json') as District[];
+  }
+  return _districts;
+}
+
+function getUpazilasData(): Upazila[] {
+  if (!_upazilas) {
+    _upazilas = require('./data/upazilas.json') as Upazila[];
+  }
+  return _upazilas;
+}
 
 // ============================================================
 // Data Access Functions
@@ -80,7 +96,7 @@ const upazilasData = upazilas as Upazila[];
  * @returns Array of all 8 divisions of Bangladesh
  */
 export function getAllDivisions(): Division[] {
-  return [...divisionsData];
+  return [...getDivisionsData()];
 }
 
 /**
@@ -88,7 +104,7 @@ export function getAllDivisions(): Division[] {
  * @returns Array of all 64 districts of Bangladesh
  */
 export function getAllDistricts(): District[] {
-  return [...districtsData];
+  return [...getDistrictsData()];
 }
 
 /**
@@ -96,7 +112,7 @@ export function getAllDistricts(): District[] {
  * @returns Array of all 495 upazilas of Bangladesh
  */
 export function getAllUpazilas(): Upazila[] {
-  return [...upazilasData];
+  return [...getUpazilasData()];
 }
 
 // ============================================================
@@ -109,7 +125,7 @@ export function getAllUpazilas(): Upazila[] {
  * @returns Division or undefined
  */
 export function getDivisionById(id: number): Division | undefined {
-  return divisionsData.find((d) => d.id === id);
+  return getDivisionsData().find((d) => d.id === id);
 }
 
 /**
@@ -118,7 +134,7 @@ export function getDivisionById(id: number): Division | undefined {
  * @returns Division or undefined
  */
 export function getDivisionBySlug(slug: string): Division | undefined {
-  return divisionsData.find((d) => d.slug === slug.toLowerCase());
+  return getDivisionsData().find((d) => d.slug === slug.toLowerCase());
 }
 
 /**
@@ -128,7 +144,7 @@ export function getDivisionBySlug(slug: string): Division | undefined {
  */
 export function getDivisionByName(name: string): Division | undefined {
   const lowerName = name.toLowerCase();
-  return divisionsData.find(
+  return getDivisionsData().find(
     (d) => d.name.toLowerCase() === lowerName || d.bnName === name
   );
 }
@@ -143,7 +159,7 @@ export function getDivisionByName(name: string): Division | undefined {
  * @returns District or undefined
  */
 export function getDistrictById(id: number): District | undefined {
-  return districtsData.find((d) => d.id === id);
+  return getDistrictsData().find((d) => d.id === id);
 }
 
 /**
@@ -152,7 +168,7 @@ export function getDistrictById(id: number): District | undefined {
  * @returns District or undefined
  */
 export function getDistrictBySlug(slug: string): District | undefined {
-  return districtsData.find((d) => d.slug === slug.toLowerCase());
+  return getDistrictsData().find((d) => d.slug === slug.toLowerCase());
 }
 
 /**
@@ -162,7 +178,7 @@ export function getDistrictBySlug(slug: string): District | undefined {
  */
 export function getDistrictByName(name: string): District | undefined {
   const lowerName = name.toLowerCase();
-  return districtsData.find(
+  return getDistrictsData().find(
     (d) => d.name.toLowerCase() === lowerName || d.bnName === name
   );
 }
@@ -173,7 +189,7 @@ export function getDistrictByName(name: string): District | undefined {
  * @returns Array of districts
  */
 export function getDistrictsByDivision(divisionId: number): District[] {
-  return districtsData.filter((d) => d.divisionId === divisionId);
+  return getDistrictsData().filter((d) => d.divisionId === divisionId);
 }
 
 /**
@@ -197,7 +213,7 @@ export function getDistrictsByDivisionSlug(divisionSlug: string): District[] {
  * @returns Upazila or undefined
  */
 export function getUpazilaById(id: number): Upazila | undefined {
-  return upazilasData.find((u) => u.id === id);
+  return getUpazilasData().find((u) => u.id === id);
 }
 
 /**
@@ -206,7 +222,7 @@ export function getUpazilaById(id: number): Upazila | undefined {
  * @returns Upazila or undefined
  */
 export function getUpazilaBySlug(slug: string): Upazila | undefined {
-  return upazilasData.find((u) => u.slug === slug.toLowerCase());
+  return getUpazilasData().find((u) => u.slug === slug.toLowerCase());
 }
 
 /**
@@ -216,7 +232,7 @@ export function getUpazilaBySlug(slug: string): Upazila | undefined {
  */
 export function getUpazilaByName(name: string): Upazila | undefined {
   const lowerName = name.toLowerCase();
-  return upazilasData.find(
+  return getUpazilasData().find(
     (u) => u.name.toLowerCase() === lowerName || u.bnName === name
   );
 }
@@ -227,7 +243,7 @@ export function getUpazilaByName(name: string): Upazila | undefined {
  * @returns Array of upazilas
  */
 export function getUpazilasByDistrict(districtId: number): Upazila[] {
-  return upazilasData.filter((u) => u.districtId === districtId);
+  return getUpazilasData().filter((u) => u.districtId === districtId);
 }
 
 /**
@@ -249,7 +265,7 @@ export function getUpazilasByDistrictSlug(districtSlug: string): Upazila[] {
 export function getUpazilasByDivision(divisionId: number): Upazila[] {
   const divisionDistricts = getDistrictsByDivision(divisionId);
   const districtIds = new Set(divisionDistricts.map((d) => d.id));
-  return upazilasData.filter((u) => districtIds.has(u.districtId));
+  return getUpazilasData().filter((u) => districtIds.has(u.districtId));
 }
 
 // ============================================================
@@ -377,20 +393,20 @@ export function getStats(): LocationStats {
   const divisionDistrictMap: Record<number, number> = {};
   const districtUpazilaMap: Record<number, number> = {};
 
-  for (const district of districtsData) {
+  for (const district of getDistrictsData()) {
     divisionDistrictMap[district.divisionId] =
       (divisionDistrictMap[district.divisionId] || 0) + 1;
   }
 
-  for (const upazila of upazilasData) {
+  for (const upazila of getUpazilasData()) {
     districtUpazilaMap[upazila.districtId] =
       (districtUpazilaMap[upazila.districtId] || 0) + 1;
   }
 
   return {
-    totalDivisions: divisionsData.length,
-    totalDistricts: districtsData.length,
-    totalUpazilas: upazilasData.length,
+    totalDivisions: getDivisionsData().length,
+    totalDistricts: getDistrictsData().length,
+    totalUpazilas: getUpazilasData().length,
     divisionDistrictMap,
     districtUpazilaMap,
   };
@@ -497,7 +513,7 @@ export function isUpazilaInDivision(upazilaId: number, divisionId: number): bool
  * @returns Array of division names
  */
 export function getDivisionNames(language: 'en' | 'bn' = 'en'): string[] {
-  return divisionsData.map((d) => (language === 'bn' ? d.bnName : d.name));
+  return getDivisionsData().map((d) => (language === 'bn' ? d.bnName : d.name));
 }
 
 /**
@@ -506,7 +522,7 @@ export function getDivisionNames(language: 'en' | 'bn' = 'en'): string[] {
  * @returns Array of district names
  */
 export function getDistrictNames(language: 'en' | 'bn' = 'en'): string[] {
-  return districtsData.map((d) => (language === 'bn' ? d.bnName : d.name));
+  return getDistrictsData().map((d) => (language === 'bn' ? d.bnName : d.name));
 }
 
 /**
@@ -515,7 +531,7 @@ export function getDistrictNames(language: 'en' | 'bn' = 'en'): string[] {
  * @returns Array of upazila names
  */
 export function getUpazilaNames(language: 'en' | 'bn' = 'en'): string[] {
-  return upazilasData.map((u) => (language === 'bn' ? u.bnName : u.name));
+  return getUpazilasData().map((u) => (language === 'bn' ? u.bnName : u.name));
 }
 
 /**
@@ -523,7 +539,7 @@ export function getUpazilaNames(language: 'en' | 'bn' = 'en'): string[] {
  * @returns Array of { value, label, labelBn } objects
  */
 export function getDivisionOptions(): { value: string; label: string; labelBn: string }[] {
-  return divisionsData.map((d) => ({
+  return getDivisionsData().map((d) => ({
     value: d.slug,
     label: d.name,
     labelBn: d.bnName,
@@ -540,7 +556,7 @@ export function getDistrictOptions(
 ): { value: string; label: string; labelBn: string }[] {
   const data = divisionId
     ? getDistrictsByDivision(divisionId)
-    : districtsData;
+    : getDistrictsData();
   return data.map((d) => ({
     value: d.slug,
     label: d.name,
@@ -558,7 +574,7 @@ export function getUpazilaOptions(
 ): { value: string; label: string; labelBn: string }[] {
   const data = districtId
     ? getUpazilasByDistrict(districtId)
-    : upazilasData;
+    : getUpazilasData();
   return data.map((u) => ({
     value: u.slug,
     label: u.name,
@@ -567,83 +583,20 @@ export function getUpazilaOptions(
 }
 
 // ============================================================
-// Raw Data Exports (for advanced usage)
+// Raw Data Getters (for advanced usage - lazy loaded)
 // ============================================================
 
-/** Raw divisions data */
-export const rawDivisions = divisionsData;
+/** Get raw divisions data (lazy loaded) */
+export function getRawDivisions(): Division[] {
+  return getDivisionsData();
+}
 
-/** Raw districts data */
-export const rawDistricts = districtsData;
+/** Get raw districts data (lazy loaded) */
+export function getRawDistricts(): District[] {
+  return getDistrictsData();
+}
 
-/** Raw upazilas data */
-export const rawUpazilas = upazilasData;
-
-// ============================================================
-// Default Export
-// ============================================================
-
-export default {
-  // Data access
-  getAllDivisions,
-  getAllDistricts,
-  getAllUpazilas,
-
-  // Division functions
-  getDivisionById,
-  getDivisionBySlug,
-  getDivisionByName,
-
-  // District functions
-  getDistrictById,
-  getDistrictBySlug,
-  getDistrictByName,
-  getDistrictsByDivision,
-  getDistrictsByDivisionSlug,
-
-  // Upazila functions
-  getUpazilaById,
-  getUpazilaBySlug,
-  getUpazilaByName,
-  getUpazilasByDistrict,
-  getUpazilasByDistrictSlug,
-  getUpazilasByDivision,
-
-  // Relationship functions
-  getDivisionOfDistrict,
-  getDistrictOfUpazila,
-  getFullAddress,
-  getFullAddressBySlug,
-
-  // Formatting functions
-  formatAddress,
-  formatAddressBengali,
-  formatAddressEnglish,
-
-  // Statistics
-  getStats,
-  getDistrictCount,
-  getUpazilaCount,
-  getUpazilaCountByDivision,
-
-  // Validation
-  isValidDivision,
-  isValidDistrict,
-  isValidUpazila,
-  isDistrictInDivision,
-  isUpazilaInDistrict,
-  isUpazilaInDivision,
-
-  // List helpers
-  getDivisionNames,
-  getDistrictNames,
-  getUpazilaNames,
-  getDivisionOptions,
-  getDistrictOptions,
-  getUpazilaOptions,
-
-  // Raw data
-  rawDivisions,
-  rawDistricts,
-  rawUpazilas,
-};
+/** Get raw upazilas data (lazy loaded) */
+export function getRawUpazilas(): Upazila[] {
+  return getUpazilasData();
+}
