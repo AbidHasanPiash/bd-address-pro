@@ -696,7 +696,7 @@ const teknaf = getUpazilaBySlug(BangladeshUpazila.TEKNAF);
 
 ### Raw Data Access
 
-For advanced usage, access raw data arrays via getter functions (lazy-loaded).
+For advanced usage, access raw data arrays via getter functions.
 
 ```typescript
 import { getRawDivisions, getRawDistricts, getRawUpazilas } from 'bd-address-pro';

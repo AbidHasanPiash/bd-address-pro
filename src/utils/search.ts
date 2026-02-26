@@ -13,31 +13,14 @@ import type {
   LocationType,
 } from '../types/location.types';
 
-// Lazy-loaded data caches
-let _divisions: Division[] | null = null;
-let _districts: District[] | null = null;
-let _upazilas: Upazila[] | null = null;
+// Static data imports (bundled for compatibility)
+import divisionsJson from '../data/divisions.json';
+import districtsJson from '../data/districts.json';
+import upazilasJson from '../data/upazilas.json';
 
-function getDivisionsData(): Division[] {
-  if (!_divisions) {
-    _divisions = require('./data/divisions.json') as Division[];
-  }
-  return _divisions;
-}
-
-function getDistrictsData(): District[] {
-  if (!_districts) {
-    _districts = require('./data/districts.json') as District[];
-  }
-  return _districts;
-}
-
-function getUpazilasData(): Upazila[] {
-  if (!_upazilas) {
-    _upazilas = require('./data/upazilas.json') as Upazila[];
-  }
-  return _upazilas;
-}
+const divisionsData = divisionsJson as Division[];
+const districtsData = districtsJson as District[];
+const upazilasData = upazilasJson as Upazila[];
 
 /**
  * Search options interface
@@ -199,7 +182,7 @@ export function search(query: string, options?: SearchOptions): LocationSearchRe
 
   // Search divisions
   if (opts.types.includes('division')) {
-    for (const division of getDivisionsData()) {
+    for (const division of divisionsData) {
       const searchResult = searchInItem(division, trimmedQuery, opts);
       if (searchResult) {
         result.divisions.push(searchResult);
@@ -211,7 +194,7 @@ export function search(query: string, options?: SearchOptions): LocationSearchRe
 
   // Search districts
   if (opts.types.includes('district')) {
-    for (const district of getDistrictsData()) {
+    for (const district of districtsData) {
       const searchResult = searchInItem(district, trimmedQuery, opts);
       if (searchResult) {
         result.districts.push(searchResult);
@@ -223,7 +206,7 @@ export function search(query: string, options?: SearchOptions): LocationSearchRe
 
   // Search upazilas
   if (opts.types.includes('upazila')) {
-    for (const upazila of getUpazilasData()) {
+    for (const upazila of upazilasData) {
       const searchResult = searchInItem(upazila, trimmedQuery, opts);
       if (searchResult) {
         result.upazilas.push(searchResult);
@@ -313,19 +296,19 @@ export function autocomplete(
   };
 
   if (opts.types.includes('division')) {
-    for (const div of getDivisionsData()) {
+    for (const div of divisionsData) {
       checkStartsWith(div.name, div.bnName, 'division', div);
     }
   }
 
   if (opts.types.includes('district')) {
-    for (const dist of getDistrictsData()) {
+    for (const dist of districtsData) {
       checkStartsWith(dist.name, dist.bnName, 'district', dist);
     }
   }
 
   if (opts.types.includes('upazila')) {
-    for (const upz of getUpazilasData()) {
+    for (const upz of upazilasData) {
       checkStartsWith(upz.name, upz.bnName, 'upazila', upz);
     }
   }
