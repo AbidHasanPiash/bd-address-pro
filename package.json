@@ -1,17 +1,17 @@
 {
   "name": "bd-address-pro",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Bangladesh address dataset with divisions, districts, and upazilas - includes Bengali names, search, and utilities",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./data/*": "./dist/data/*"
   },
