@@ -921,7 +921,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-MIT © [Abid Hasan](https://github.com/abidhasan)
+MIT © [Abid Hasan](https://github.com/AbidHasanPiash)
 
 ---
 
