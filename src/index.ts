@@ -12,6 +12,7 @@ import type {
   Division,
   District,
   Upazila,
+  Union,
   FullAddress,
   Coordinates,
   BaseLocation,
@@ -20,6 +21,7 @@ import type {
   LocationType,
   AnyLocation,
   LocationStats,
+  PostalInfo,
 } from './types/location.types';
 
 export {
@@ -32,6 +34,7 @@ export type {
   Division,
   District,
   Upazila,
+  Union,
   FullAddress,
   Coordinates,
   BaseLocation,
@@ -40,6 +43,7 @@ export type {
   LocationType,
   AnyLocation,
   LocationStats,
+  PostalInfo,
 };
 
 // ============================================================
@@ -51,6 +55,7 @@ export {
   searchDivisions,
   searchDistricts,
   searchUpazilas,
+  searchUnions,
   autocomplete,
   fuzzySearch,
   searchBengali,
@@ -65,10 +70,12 @@ export type { SearchOptions } from './utils/search';
 import divisionsJson from './data/divisions.json';
 import districtsJson from './data/districts.json';
 import upazilasJson from './data/upazilas.json';
+import unionsJson from './data/unions.json';
 
 const divisionsData = divisionsJson as Division[];
 const districtsData = districtsJson as District[];
 const upazilasData = upazilasJson as Upazila[];
+const unionsData = unionsJson as Union[];
 
 // ============================================================
 // Data Access Functions
@@ -96,6 +103,14 @@ export function getAllDistricts(): District[] {
  */
 export function getAllUpazilas(): Upazila[] {
   return [...upazilasData];
+}
+
+/**
+ * Get all unions
+ * @returns Array of all 4579 unions of Bangladesh
+ */
+export function getAllUnions(): Union[] {
+  return [...unionsData];
 }
 
 // ============================================================
@@ -252,6 +267,82 @@ export function getUpazilasByDivision(divisionId: number): Upazila[] {
 }
 
 // ============================================================
+// Union Functions
+// ============================================================
+
+/**
+ * Get a union by ID
+ * @param id - Union ID
+ * @returns Union or undefined
+ */
+export function getUnionById(id: number): Union | undefined {
+  return unionsData.find((u) => u.id === id);
+}
+
+/**
+ * Get a union by slug
+ * @param slug - Union slug
+ * @returns Union or undefined
+ */
+export function getUnionBySlug(slug: string): Union | undefined {
+  return unionsData.find((u) => u.slug === slug.toLowerCase());
+}
+
+/**
+ * Get a union by name (English or Bengali)
+ * @param name - Union name
+ * @returns Union or undefined
+ */
+export function getUnionByName(name: string): Union | undefined {
+  const lowerName = name.toLowerCase();
+  return unionsData.find(
+    (u) => u.name.toLowerCase() === lowerName || u.bnName === name
+  );
+}
+
+/**
+ * Get all unions in an upazila
+ * @param upazilaId - Upazila ID
+ * @returns Array of unions
+ */
+export function getUnionsByUpazila(upazilaId: number): Union[] {
+  return unionsData.filter((u) => u.upazilaId === upazilaId);
+}
+
+/**
+ * Get all unions in an upazila by upazila slug
+ * @param upazilaSlug - Upazila slug
+ * @returns Array of unions
+ */
+export function getUnionsByUpazilaSlug(upazilaSlug: string): Union[] {
+  const upazila = getUpazilaBySlug(upazilaSlug);
+  if (!upazila) return [];
+  return getUnionsByUpazila(upazila.id);
+}
+
+/**
+ * Get all unions in a district
+ * @param districtId - District ID
+ * @returns Array of unions
+ */
+export function getUnionsByDistrict(districtId: number): Union[] {
+  const districtUpazilas = getUpazilasByDistrict(districtId);
+  const upazilaIds = new Set(districtUpazilas.map((u) => u.id));
+  return unionsData.filter((u) => upazilaIds.has(u.upazilaId));
+}
+
+/**
+ * Get all unions in a division
+ * @param divisionId - Division ID
+ * @returns Array of unions
+ */
+export function getUnionsByDivision(divisionId: number): Union[] {
+  const divisionUpazilas = getUpazilasByDivision(divisionId);
+  const upazilaIds = new Set(divisionUpazilas.map((u) => u.id));
+  return unionsData.filter((u) => upazilaIds.has(u.upazilaId));
+}
+
+// ============================================================
 // Relationship Functions
 // ============================================================
 
@@ -278,6 +369,17 @@ export function getDistrictOfUpazila(upazilaId: number): District | undefined {
 }
 
 /**
+ * Get the parent upazila of a union
+ * @param unionId - Union ID
+ * @returns Upazila or undefined
+ */
+export function getUpazilaOfUnion(unionId: number): Upazila | undefined {
+  const union = getUnionById(unionId);
+  if (!union) return undefined;
+  return getUpazilaById(union.upazilaId);
+}
+
+/**
  * Get the full address hierarchy for an upazila
  * @param upazilaId - Upazila ID
  * @returns FullAddress or undefined
@@ -293,6 +395,27 @@ export function getFullAddress(upazilaId: number): FullAddress | undefined {
   if (!division) return undefined;
 
   return { division, district, upazila };
+}
+
+/**
+ * Get the full address hierarchy for a union
+ * @param unionId - Union ID
+ * @returns FullAddress with union or undefined
+ */
+export function getFullAddressOfUnion(unionId: number): FullAddress | undefined {
+  const union = getUnionById(unionId);
+  if (!union) return undefined;
+
+  const upazila = getUpazilaById(union.upazilaId);
+  if (!upazila) return undefined;
+
+  const district = getDistrictById(upazila.districtId);
+  if (!district) return undefined;
+
+  const division = getDivisionById(district.divisionId);
+  if (!division) return undefined;
+
+  return { division, district, upazila, union };
 }
 
 /**
@@ -375,6 +498,7 @@ export function formatAddressEnglish(address: FullAddress): string {
 export function getStats(): LocationStats {
   const divisionDistrictMap: Record<number, number> = {};
   const districtUpazilaMap: Record<number, number> = {};
+  const upazilaUnionMap: Record<number, number> = {};
 
   for (const district of districtsData) {
     divisionDistrictMap[district.divisionId] =
@@ -386,12 +510,19 @@ export function getStats(): LocationStats {
       (districtUpazilaMap[upazila.districtId] || 0) + 1;
   }
 
+  for (const union of unionsData) {
+    upazilaUnionMap[union.upazilaId] =
+      (upazilaUnionMap[union.upazilaId] || 0) + 1;
+  }
+
   return {
     totalDivisions: divisionsData.length,
     totalDistricts: districtsData.length,
     totalUpazilas: upazilasData.length,
+    totalUnions: unionsData.length,
     divisionDistrictMap,
     districtUpazilaMap,
+    upazilaUnionMap,
   };
 }
 
@@ -420,6 +551,59 @@ export function getUpazilaCount(districtId: number): number {
  */
 export function getUpazilaCountByDivision(divisionId: number): number {
   return getUpazilasByDivision(divisionId).length;
+}
+
+// ============================================================
+// Postal Code Functions
+// ============================================================
+
+/**
+ * Get postal code range for a district
+ * @param districtId - District ID
+ * @returns Postal code range (e.g., "8700-8799") or undefined
+ */
+export function getDistrictPostalCode(districtId: number): string | undefined {
+  const district = getDistrictById(districtId);
+  return district?.postalCode;
+}
+
+/**
+ * Get postal code for an upazila
+ * @param upazilaId - Upazila ID
+ * @returns Specific postal code (e.g., "8730") or undefined
+ */
+export function getUpazilaPostalCode(upazilaId: number): string | undefined {
+  const upazila = getUpazilaById(upazilaId);
+  return upazila?.postalCode;
+}
+
+/**
+ * Get postal code for a union (via its upazila)
+ * @param unionId - Union ID
+ * @returns Postal code of the union's upazila or undefined
+ */
+export function getUnionPostalCode(unionId: number): string | undefined {
+  const union = getUnionById(unionId);
+  if (!union) return undefined;
+  return getUpazilaPostalCode(union.upazilaId);
+}
+
+/**
+ * Get full postal information for a location
+ * @param upazilaId - Upazila ID
+ * @returns Object with upazila postal code and district postal code range
+ */
+export function getPostalInfo(upazilaId: number): PostalInfo | undefined {
+  const upazila = getUpazilaById(upazilaId);
+  if (!upazila?.postalCode) return undefined;
+  
+  const district = getDistrictById(upazila.districtId);
+  if (!district?.postalCode) return undefined;
+  
+  return {
+    postalCode: upazila.postalCode,
+    districtRange: district.postalCode,
+  };
 }
 
 // ============================================================
@@ -582,4 +766,9 @@ export function getRawDistricts(): District[] {
 /** Get raw upazilas data */
 export function getRawUpazilas(): Upazila[] {
   return upazilasData;
+}
+
+/** Get raw unions data */
+export function getRawUnions(): Union[] {
+  return unionsData;
 }

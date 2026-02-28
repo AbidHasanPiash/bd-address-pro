@@ -7,6 +7,7 @@ import type {
   Division,
   District,
   Upazila,
+  Union,
   SearchResult,
   LocationSearchResult,
   AnyLocation,
@@ -17,10 +18,12 @@ import type {
 import divisionsJson from '../data/divisions.json';
 import districtsJson from '../data/districts.json';
 import upazilasJson from '../data/upazilas.json';
+import unionsJson from '../data/unions.json';
 
 const divisionsData = divisionsJson as Division[];
 const districtsData = districtsJson as District[];
 const upazilasData = upazilasJson as Upazila[];
+const unionsData = unionsJson as Union[];
 
 /**
  * Search options interface
@@ -49,7 +52,7 @@ const defaultSearchOptions: Required<SearchOptions> = {
   limit: 10,
   threshold: 0.3,
   caseSensitive: false,
-  types: ['division', 'district', 'upazila'],
+  types: ['division', 'district', 'upazila', 'union'],
 };
 
 /**
@@ -172,6 +175,7 @@ export function search(query: string, options?: SearchOptions): LocationSearchRe
     divisions: [],
     districts: [],
     upazilas: [],
+    unions: [],
   };
 
   if (!query || query.trim().length === 0) {
@@ -216,6 +220,18 @@ export function search(query: string, options?: SearchOptions): LocationSearchRe
     result.upazilas = result.upazilas.slice(0, opts.limit);
   }
 
+  // Search unions
+  if (opts.types.includes('union')) {
+    for (const union of unionsData) {
+      const searchResult = searchInItem(union, trimmedQuery, opts);
+      if (searchResult) {
+        result.unions.push(searchResult);
+      }
+    }
+    result.unions.sort((a, b) => b.score - a.score);
+    result.unions = result.unions.slice(0, opts.limit);
+  }
+
   return result;
 }
 
@@ -229,6 +245,7 @@ export function quickSearch(query: string, options?: SearchOptions): AnyLocation
     ...result.divisions,
     ...result.districts,
     ...result.upazilas,
+    ...result.unions,
   ];
 
   if (allResults.length === 0) return null;
@@ -272,6 +289,17 @@ export function searchUpazilas(
 }
 
 /**
+ * Search only unions
+ */
+export function searchUnions(
+  query: string,
+  options?: Omit<SearchOptions, 'types'>
+): SearchResult<Union>[] {
+  const result = search(query, { ...options, types: ['union'] });
+  return result.unions;
+}
+
+/**
  * Autocomplete search - returns names that start with query
  */
 export function autocomplete(
@@ -310,6 +338,12 @@ export function autocomplete(
   if (opts.types.includes('upazila')) {
     for (const upz of upazilasData) {
       checkStartsWith(upz.name, upz.bnName, 'upazila', upz);
+    }
+  }
+
+  if (opts.types.includes('union')) {
+    for (const union of unionsData) {
+      checkStartsWith(union.name, union.bnName, 'union', union);
     }
   }
 

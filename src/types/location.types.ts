@@ -603,11 +603,21 @@ export interface District extends BaseLocation {
   coordinates?: Coordinates;
   area?: number;
   population?: number;
+  postalCode?: string; // Postal code range (e.g., "8700-8799")
 }
 
 // Upazila interface with district reference
 export interface Upazila extends BaseLocation {
   districtId: number;
+  coordinates?: Coordinates;
+  area?: number;
+  population?: number;
+  postalCode?: string; // Specific 4-digit postal code
+}
+
+// Union interface with upazila reference
+export interface Union extends BaseLocation {
+  upazilaId: number;
   coordinates?: Coordinates;
   area?: number;
   population?: number;
@@ -618,6 +628,13 @@ export interface FullAddress {
   division: Division;
   district: District;
   upazila: Upazila;
+  union?: Union;
+}
+
+// Postal information for a location
+export interface PostalInfo {
+  postalCode: string;    // Specific upazila postal code (e.g., "1340")
+  districtRange: string; // District postal code range (e.g., "1000-1399")
 }
 
 // Search result types
@@ -631,17 +648,20 @@ export interface LocationSearchResult {
   divisions: SearchResult<Division>[];
   districts: SearchResult<District>[];
   upazilas: SearchResult<Upazila>[];
+  unions: SearchResult<Union>[];
 }
 
 // Location type for unified operations
-export type LocationType = 'division' | 'district' | 'upazila';
-export type AnyLocation = Division | District | Upazila;
+export type LocationType = 'division' | 'district' | 'upazila' | 'union';
+export type AnyLocation = Division | District | Upazila | Union;
 
 // Statistics interface
 export interface LocationStats {
   totalDivisions: number;
   totalDistricts: number;
   totalUpazilas: number;
+  totalUnions: number;
   divisionDistrictMap: Record<number, number>;
   districtUpazilaMap: Record<number, number>;
+  upazilaUnionMap: Record<number, number>;
 }

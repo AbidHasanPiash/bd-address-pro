@@ -1,6 +1,6 @@
 # bd-address-pro
 
-Complete Bangladesh address data package with all 8 divisions, 64 districts, and 495 upazilas. Includes Bengali (বাংলা) names, coordinates, and powerful search functionality.
+Complete Bangladesh address data package with all 8 divisions, 64 districts, 495 upazilas, and 4,579 unions. Includes Bengali (বাংলা) names, coordinates, and powerful search functionality.
 
 [![npm version](https://badge.fury.io/js/bd-address-pro.svg)](https://www.npmjs.com/package/bd-address-pro)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
@@ -11,14 +11,16 @@ Check out the interactive demo to explore all features: **[https://bd-address-pr
 
 ## Features
 
-- ✅ Complete data for all **8 Divisions**, **64 Districts**, and **495 Upazilas**
+- ✅ Complete data for all **8 Divisions**, **64 Districts**, **495 Upazilas**, and **4,579 Unions**
 - ✅ **Bengali (বাংলা) names** for all locations
+- ✅ **Postal codes** for all districts (ranges) and upazilas (specific codes)
 - ✅ **TypeScript** support with full type definitions
 - ✅ **Powerful search** with fuzzy matching and autocomplete
 - ✅ **Geo-coordinates** for divisions and districts
 - ✅ **Zero dependencies** - lightweight and fast
 - ✅ Type-safe **enums** for all locations
 - ✅ **Tree-shakeable** - import only what you need
+- ✅ **Full hierarchy** - Division → District → Upazila → Union
 
 ## Installation
 
@@ -43,6 +45,7 @@ import {
   getAllDivisions,
   getDistrictsByDivision,
   getUpazilasByDistrict,
+  getUnionsByUpazila,
   search,
 } from 'bd-address-pro';
 
@@ -55,6 +58,11 @@ console.log(divisions);
 const dhakaDistricts = getDistrictsByDivision(1);
 console.log(dhakaDistricts);
 // [{ id: 18, name: 'Dhaka', bnName: 'ঢাকা', divisionId: 1, ... }, ...]
+
+// Get unions in an upazila
+const unions = getUnionsByUpazila(1);
+console.log(unions);
+// [{ id: 1, name: 'Amtli', bnName: 'আমতলী', upazilaId: 1, ... }, ...]
 
 // Search for locations
 const results = search('সিলেট');
@@ -94,6 +102,16 @@ import { getAllUpazilas } from 'bd-address-pro';
 
 const upazilas = getAllUpazilas();
 // Returns: Upazila[]
+```
+
+#### `getAllUnions()`
+Returns all 4,579 unions of Bangladesh.
+
+```typescript
+import { getAllUnions } from 'bd-address-pro';
+
+const unions = getAllUnions();
+// Returns: Union[]
 ```
 
 ---
@@ -253,6 +271,83 @@ const barishalUpazilas = getUpazilasByDivision(5);
 
 ---
 
+### Union Functions
+
+#### `getUnionById(id: number)`
+Get a union by its ID.
+
+```typescript
+import { getUnionById } from 'bd-address-pro';
+
+const union = getUnionById(1);
+// { id: 1, name: 'Amtli', bnName: 'আমতলী', slug: 'amtli_amtali', upazilaId: 1 }
+```
+
+#### `getUnionBySlug(slug: string)`
+Get a union by its slug.
+
+```typescript
+import { getUnionBySlug } from 'bd-address-pro';
+
+const union = getUnionBySlug('amtli_amtali');
+// { id: 1, name: 'Amtli', bnName: 'আমতলী', slug: 'amtli_amtali', upazilaId: 1 }
+```
+
+#### `getUnionByName(name: string)`
+Get a union by English or Bengali name.
+
+```typescript
+import { getUnionByName } from 'bd-address-pro';
+
+// English name
+const union1 = getUnionByName('Amtli');
+
+// Bengali name  
+const union2 = getUnionByName('আমতলী');
+```
+
+#### `getUnionsByUpazila(upazilaId: number)`
+Get all unions in an upazila.
+
+```typescript
+import { getUnionsByUpazila } from 'bd-address-pro';
+
+const unions = getUnionsByUpazila(1); // Amtali upazila
+// Returns all unions in Amtali upazila
+```
+
+#### `getUnionsByUpazilaSlug(upazilaSlug: string)`
+Get all unions by upazila slug.
+
+```typescript
+import { getUnionsByUpazilaSlug } from 'bd-address-pro';
+
+const unions = getUnionsByUpazilaSlug('amtali');
+// Returns all unions in Amtali upazila
+```
+
+#### `getUnionsByDistrict(districtId: number)`
+Get all unions in a district.
+
+```typescript
+import { getUnionsByDistrict } from 'bd-address-pro';
+
+const unions = getUnionsByDistrict(1); // Barguna district
+// Returns all unions in Barguna district
+```
+
+#### `getUnionsByDivision(divisionId: number)`
+Get all unions in a division.
+
+```typescript
+import { getUnionsByDivision } from 'bd-address-pro';
+
+const unions = getUnionsByDivision(5); // Barishal division
+// Returns all unions in Barishal division
+```
+
+---
+
 ### Relationship Functions
 
 #### `getDivisionOfDistrict(districtId: number)`
@@ -273,6 +368,16 @@ import { getDistrictOfUpazila } from 'bd-address-pro';
 
 const district = getDistrictOfUpazila(151); // Savar upazila
 // { id: 18, name: 'Dhaka', bnName: 'ঢাকা', ... }
+```
+
+#### `getUpazilaOfUnion(unionId: number)`
+Get the parent upazila of a union.
+
+```typescript
+import { getUpazilaOfUnion } from 'bd-address-pro';
+
+const upazila = getUpazilaOfUnion(1); // Amtli union
+// { id: 1, name: 'Amtali', bnName: 'আমতলী', ... }
 ```
 
 #### `getFullAddress(upazilaId: number)`
@@ -297,6 +402,21 @@ import { getFullAddressBySlug } from 'bd-address-pro';
 
 const address = getFullAddressBySlug('sreemangal');
 // Returns full address hierarchy for Sreemangal
+```
+
+#### `getFullAddressOfUnion(unionId: number)`
+Get complete address hierarchy for a union (includes union in result).
+
+```typescript
+import { getFullAddressOfUnion } from 'bd-address-pro';
+
+const address = getFullAddressOfUnion(1); // Amtli union
+// {
+//   division: { id: 5, name: 'Barishal', bnName: 'বরিশাল', ... },
+//   district: { id: 1, name: 'Barguna', bnName: 'বরগুনা', ... },
+//   upazila: { id: 1, name: 'Amtali', bnName: 'আমতলী', ... },
+//   union: { id: 1, name: 'Amtli', bnName: 'আমতলী', ... }
+// }
 ```
 
 ---
@@ -365,18 +485,19 @@ const results = search('dhaka');
 console.log(results.divisions); // Dhaka division
 console.log(results.districts); // Dhaka district
 console.log(results.upazilas);  // Related upazilas
+console.log(results.unions);    // Related unions
 
 // Bengali search
 const bnResults = search('সিলেট');
 
 // With options
 const filtered = search('dhaka', {
-  types: ['district'],        // Only search districts
-  limit: 5,                   // Max 5 results
-  threshold: 0.5,             // Minimum match score (0-1)
-  includeEnglish: true,       // Search English names
-  includeBengali: true,       // Search Bengali names
-  includeSlug: true,          // Search slugs
+  types: ['district', 'union'], // Only search districts and unions
+  limit: 5,                     // Max 5 results per type
+  threshold: 0.5,               // Minimum match score (0-1)
+  includeEnglish: true,         // Search English names
+  includeBengali: true,         // Search Bengali names
+  includeSlug: true,            // Search slugs
 });
 ```
 
@@ -418,6 +539,16 @@ import { searchUpazilas } from 'bd-address-pro';
 
 const results = searchUpazilas('savar');
 // [{ item: { name: 'Savar', ... }, score: 1, matchedField: 'name' }]
+```
+
+#### `searchUnions(query, options?)`
+Search only in unions.
+
+```typescript
+import { searchUnions } from 'bd-address-pro';
+
+const results = searchUnions('আমতলী');
+// [{ item: { name: 'Amtli', bnName: 'আমতলী', ... }, score: 1, matchedField: 'bnName' }]
 ```
 
 #### `autocomplete(query, options?)`
@@ -481,8 +612,10 @@ const stats = getStats();
 //   totalDivisions: 8,
 //   totalDistricts: 64,
 //   totalUpazilas: 495,
+//   totalUnions: 4579,
 //   divisionDistrictMap: { 1: 13, 2: 11, ... },
-//   districtUpazilaMap: { 1: 6, 2: 10, ... }
+//   districtUpazilaMap: { 1: 6, 2: 10, ... },
+//   upazilaUnionMap: { 1: 9, 2: 7, ... }
 // }
 ```
 
@@ -514,6 +647,53 @@ import { getUpazilaCountByDivision } from 'bd-address-pro';
 
 const count = getUpazilaCountByDivision(6); // Sylhet division
 // 40
+```
+
+---
+
+### Postal Code Functions
+
+#### `getDistrictPostalCode(districtId: number)`
+Get postal code range for a district.
+
+```typescript
+import { getDistrictPostalCode } from 'bd-address-pro';
+
+const range = getDistrictPostalCode(18); // Dhaka district
+// "1000-1399"
+```
+
+#### `getUpazilaPostalCode(upazilaId: number)`
+Get specific postal code for an upazila.
+
+```typescript
+import { getUpazilaPostalCode } from 'bd-address-pro';
+
+const code = getUpazilaPostalCode(151); // Savar upazila
+// "1340"
+```
+
+#### `getUnionPostalCode(unionId: number)`
+Get postal code for a union (via its upazila).
+
+```typescript
+import { getUnionPostalCode } from 'bd-address-pro';
+
+const code = getUnionPostalCode(1); // Amtli union
+// "8730"
+```
+
+#### `getPostalInfo(upazilaId: number)`
+Get full postal information for a location. Returns a `PostalInfo` object.
+
+```typescript
+import { getPostalInfo, PostalInfo } from 'bd-address-pro';
+
+const info: PostalInfo | undefined = getPostalInfo(151); // Savar
+// {
+//   postalCode: "1340",
+//   districtRange: "1000-1399"
+// }
 ```
 
 ---
@@ -703,11 +883,12 @@ const teknaf = getUpazilaBySlug(BangladeshUpazila.TEKNAF);
 For advanced usage, access raw data arrays via getter functions.
 
 ```typescript
-import { getRawDivisions, getRawDistricts, getRawUpazilas } from 'bd-address-pro';
+import { getRawDivisions, getRawDistricts, getRawUpazilas, getRawUnions } from 'bd-address-pro';
 
 console.log(getRawDivisions().length);  // 8
 console.log(getRawDistricts().length);  // 64
 console.log(getRawUpazilas().length);   // 495
+console.log(getRawUnions().length);     // 4579
 ```
 
 ---
@@ -721,6 +902,7 @@ import type {
   Division,
   District,
   Upazila,
+  Union,
   FullAddress,
   Coordinates,
   SearchResult,
@@ -729,6 +911,7 @@ import type {
   AnyLocation,
   LocationStats,
   SearchOptions,
+  PostalInfo,
 } from 'bd-address-pro';
 ```
 
@@ -753,6 +936,7 @@ interface District {
   slug: string;
   divisionId: number;
   coordinates?: Coordinates;
+  postalCode?: string;  // Postal code range (e.g., "1000-1399")
 }
 
 interface Upazila {
@@ -761,15 +945,30 @@ interface Upazila {
   bnName: string;
   slug: string;
   districtId: number;
+  postalCode?: string;  // Specific 4-digit postal code (e.g., "1340")
+}
+
+interface Union {
+  id: number;
+  name: string;
+  bnName: string;
+  slug: string;
+  upazilaId: number;
 }
 
 interface FullAddress {
   division: Division;
   district: District;
   upazila: Upazila;
+  union?: Union;  // Optional - present when using getFullAddressOfUnion
 }
 
-type LocationType = 'division' | 'district' | 'upazila';
+interface PostalInfo {
+  postalCode: string;    // Specific upazila postal code (e.g., "1340")
+  districtRange: string; // District postal code range (e.g., "1000-1399")
+}
+
+type LocationType = 'division' | 'district' | 'upazila' | 'union';
 ```
 
 ---
@@ -901,17 +1100,28 @@ function validateAddress(divisionId: number, districtId: number, upazilaId: numb
 
 ## Data Structure
 
+### Administrative Hierarchy
+```
+Bangladesh
+├── 8 Divisions
+│   ├── 64 Districts
+│   │   ├── 495 Upazilas
+│   │   │   └── 4,579 Unions
+```
+
 ### Divisions
-| ID | Name | Bengali | Districts |
-|----|------|---------|-----------|
-| 1 | Dhaka | ঢাকা | 13 |
-| 2 | Chattogram | চট্টগ্রাম | 11 |
-| 3 | Rajshahi | রাজশাহী | 8 |
-| 4 | Khulna | খুলনা | 10 |
-| 5 | Barishal | বরিশাল | 6 |
-| 6 | Sylhet | সিলেট | 4 |
-| 7 | Rangpur | রংপুর | 8 |
-| 8 | Mymensingh | ময়মনসিংহ | 4 |
+| ID | Name | Bengali | Districts | Upazilas | Unions |
+|----|------|---------|-----------|----------|--------|
+| 1 | Dhaka | ঢাকা | 13 | 90 | ~900 |
+| 2 | Chattogram | চট্টগ্রাম | 11 | 99 | ~950 |
+| 3 | Rajshahi | রাজশাহী | 8 | 70 | ~650 |
+| 4 | Khulna | খুলনা | 10 | 59 | ~550 |
+| 5 | Barishal | বরিশাল | 6 | 42 | ~380 |
+| 6 | Sylhet | সিলেট | 4 | 40 | ~350 |
+| 7 | Rangpur | রংপুর | 8 | 58 | ~530 |
+| 8 | Mymensingh | ময়মনসিংহ | 4 | 37 | ~270 |
+
+**Totals:** 8 Divisions → 64 Districts → 495 Upazilas → 4,579 Unions
 
 ---
 
